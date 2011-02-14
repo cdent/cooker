@@ -150,13 +150,6 @@ class Optparse
 	end
 end
 
-options = Optparse.parse(ARGV)
-
-if(ARGV.empty?)
-	puts options.help
-	exit
-end
-
 def remoteFileExists?(url)
 	url = URI.parse(url)
 	Net::HTTP.start(url.host, url.port) do |http|
@@ -173,32 +166,47 @@ def fileExists?(file)
 	r
 end
 
-ARGV.each do |file|
-	if(!fileExists?(file))
-		STDERR.puts("ERROR - File '#{file}' does not exist.")
-		exit
-	end
+def run(args, options)
+    if(args.empty?)
+            puts options.help
+            exit
+    end
+
+    args.each do |file|
+            if(!fileExists?(file))
+                    STDERR.puts("ERROR - File '#{file}' does not exist.")
+                    exit
+            end
+    end
+
+    Tiddler.format = options.format
+    Recipe.quiet = options.quiet
+    Recipe.section = options.section
+    ENV['TW_ROOT'] = options.root || ENV['TW_ROOT'] || ENV['TW_TRUNKDIR']
+    Recipe.plugins = options.plugins
+    Recipe.splash = options.splash
+    Recipe.ignorecopy = options.ignorecopy
+    Ingredient.compress = options.compress
+    Ingredient.compresstype = options.compresstype
+    Ingredient.compressplugins = options.compressplugins
+    Ingredient.compressdeprecated = options.compressdeprecated
+    Ingredient.compresshead = options.compresshead
+    Ingredient.keepallcomments = options.keepallcomments
+    Ingredient.stripcomments = options.stripcomments
+    Tiddler.ginsu = false
+    Tiddler.usefiletime = options.usefiletime
+
+    args.each do |file|
+            recipe = Recipe.new(file, options.dest, false, options.outputfile)
+            recipe.scanrecipe
+            recipe.cook
+    end
+
 end
 
-Tiddler.format = options.format
-Recipe.quiet = options.quiet
-Recipe.section = options.section
-ENV['TW_ROOT'] = options.root || ENV['TW_ROOT'] || ENV['TW_TRUNKDIR']
-Recipe.plugins = options.plugins
-Recipe.splash = options.splash
-Recipe.ignorecopy = options.ignorecopy
-Ingredient.compress = options.compress
-Ingredient.compresstype = options.compresstype
-Ingredient.compressplugins = options.compressplugins
-Ingredient.compressdeprecated = options.compressdeprecated
-Ingredient.compresshead = options.compresshead
-Ingredient.keepallcomments = options.keepallcomments
-Ingredient.stripcomments = options.stripcomments
-Tiddler.ginsu = false
-Tiddler.usefiletime = options.usefiletime
+$options = Optparse.parse(ARGV)
 
-ARGV.each do |file|
-	recipe = Recipe.new(file, options.dest, false, options.outputfile)
-	recipe.scanrecipe
-	recipe.cook
+if __FILE__ == $0
+    run(ARGV, $options)
 end
+

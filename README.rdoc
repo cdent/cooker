@@ -1,0 +1,20 @@
+= cooker
+
+cook and ginsu are tools to manipulate TiddlyWiki files.
+
+cook takes a recipe build up a TiddlyWiki from ingredients.
+
+ginsu takes a TiddlyWiki and breaks it up into Tiddlers.
+
+== Testing
+
+There are currently two ways to test:
+
+test/test_suite can be run as a shell script to exercise the code
+
+rake test will run the start of some shoulda tests
+
+== Copyright
+
+Copyright (c) 2011 UnaMesa
+
